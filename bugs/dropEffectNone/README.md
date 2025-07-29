@@ -133,20 +133,20 @@ graph TB
 
 ### File: `third_party/blink/renderer/core/input/event_handler.cc`
 
-**Function: `UpdateDragAndDrop()`** - [Lines 1343-1436](/third_party/blink/renderer/core/input/event_handler.cc#L1343)
+**Function: `UpdateDragAndDrop()`** - [Lines 1343-1436](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/input/event_handler.cc;l=1343)
 - Handles mouse move events during drag
 - Dispatches `dragover` events to JavaScript
 - **Status**: ✅ Working correctly
 
 ### File: `third_party/blink/renderer/core/input/mouse_event_manager.cc`
 
-**Function: `DispatchDragEvent()`** - [Lines 1004-1050](/third_party/blink/renderer/core/input/mouse_event_manager.cc#L1004)
+**Function: `DispatchDragEvent()`** - [Lines 1004-1050](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/input/mouse_event_manager.cc;l=1004)
 - Creates DragEvent objects and dispatches them
 - **⚠️ CRITICAL DISCOVERY**: Creates **original DataTransfer instance** for dragstart events
 - This instance is stored in `GetDragState().drag_data_transfer_`
 - **Status**: ✅ Working correctly for dragstart, but different instances used later
 
-**Function: `DragSourceEndedAt()`** - [Lines 1065-1076](/third_party/blink/renderer/core/input/mouse_event_manager.cc#L1065)
+**Function: `DragSourceEndedAt()`** - [Lines 1065-1076](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/input/mouse_event_manager.cc;l=1065)
 - **⚠️ PROBLEMATIC**: Calls `SetDestinationOperation()` on the **original dragstart instance**
 - However, dragover/drop events use **different DataTransfer instances** created by DragController
 ```cpp
@@ -158,7 +158,7 @@ if (GetDragState().drag_src_) {
 
 ### File: `third_party/blink/renderer/core/page/drag_controller.cc`
 
-**Function: `CreateDraggingDataTransfer()`** - [Lines 1155-1162](/third_party/blink/renderer/core/page/drag_controller.cc#L1155)
+**Function: `CreateDraggingDataTransfer()`** - [Lines 1155-1162](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/page/drag_controller.cc;l=1155)
 - **⚠️ ROOT CAUSE**: Creates **new DataTransfer instances** for dragover/drop events
 - These instances share the same `DataObject` but have separate `drop_effect_set_by_web_` flags
 ```cpp
@@ -167,18 +167,18 @@ return DataTransfer::Create(DataTransfer::kDragAndDrop,
 ```
 - **Status**: ❌ Creates multiple instances, breaking flag preservation
 
-**Function: `DispatchDragEvent()`** - [Lines 398-404](/third_party/blink/renderer/core/page/drag_controller.cc#L398)
+**Function: `DispatchDragEvent()`** - [Lines 398-404](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/page/drag_controller.cc;l=398)
 - Uses `CreateDraggingDataTransfer()` for dragover/dragenter events
 - **Status**: ❌ Different instance than dragstart, loses web-set flag
 
 ### File: `third_party/blink/renderer/core/clipboard/data_transfer.cc`
 
-**Function: `setDropEffect()`** - [Lines 260-272](/third_party/blink/renderer/core/clipboard/data_transfer.cc#L260)
+**Function: `setDropEffect()`** - [Lines 260-272](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.cc;l=260)
 - Called by JavaScript to set dropEffect
 - **Status**: ✅ Working correctly - stores value in `drop_effect_`
 - **⚠️ ISSUE**: Sets `drop_effect_set_by_web_` flag only on **current instance**
 
-**Function: `SetDestinationOperation()`** - [Lines 599-602](/third_party/blink/renderer/core/clipboard/data_transfer.cc#L599)
+**Function: `SetDestinationOperation()`** - [Lines 599-602](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.cc;l=599)
 - **⚠️ PROBLEMATIC**: Overwrites `drop_effect_` without checking shared state
 - **⚠️ ISSUE**: Checks `drop_effect_set_by_web_` flag only on **current instance**
 ```cpp
@@ -191,13 +191,13 @@ void DataTransfer::SetDestinationOperation(ui::mojom::blink::DragOperation op) {
 }
 ```
 
-**Function: `dropEffect()`** - [Lines 84-86](/third_party/blink/renderer/core/clipboard/data_transfer.h#L84)
+**Function: `dropEffect()`** - [Lines 84-86](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.h;l=84)
 - Returns the current dropEffect value
 - **Status**: ✅ Working correctly - returns whatever is in `drop_effect_`
 
 ### File: `third_party/blink/renderer/core/page/drag_controller.cc`
 
-**Function: `TryDHTMLDrag()`** - [Lines 808-842](/third_party/blink/renderer/core/page/drag_controller.cc#L808)
+**Function: `TryDHTMLDrag()`** - [Lines 808-842](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/page/drag_controller.cc;l=808)
 - Orchestrates the drag operation
 - Calls `UpdateDragAndDrop()` which triggers dragover events
 - **Status**: ✅ Working correctly for dragover flow
@@ -218,14 +218,14 @@ void DataTransfer::SetDestinationOperation(ui::mojom::blink::DragOperation op) {
 - Instance used for `dragover` ≠ Instance used for `drop` ≠ Instance used for `SetDestinationOperation`
 
 ### Related Helper Functions:
-- [`ConvertDragOperationsMaskToEffectAllowed()`](/third_party/blink/renderer/core/clipboard/data_transfer.cc#L199) - Converts browser operations to web API strings
-- [`ConvertEffectAllowedToDragOperationsMask()`](/third_party/blink/renderer/core/clipboard/data_transfer.cc#L168) - Converts web API strings to browser operations
+- [`ConvertDragOperationsMaskToEffectAllowed()`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.cc;l=199) - Converts browser operations to web API strings
+- [`ConvertEffectAllowedToDragOperationsMask()`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.cc;l=168) - Converts web API strings to browser operations
 
 ### Key Files Involved:
-- [`third_party/blink/renderer/core/clipboard/data_transfer.cc`](/third_party/blink/renderer/core/clipboard/data_transfer.cc)
-- [`third_party/blink/renderer/core/clipboard/data_transfer.h`](/third_party/blink/renderer/core/clipboard/data_transfer.h)
-- [`third_party/blink/renderer/core/input/mouse_event_manager.cc`](/third_party/blink/renderer/core/input/mouse_event_manager.cc)
-- [`third_party/blink/renderer/core/page/drag_controller.cc`](/third_party/blink/renderer/core/page/drag_controller.cc)
+- [`third_party/blink/renderer/core/clipboard/data_transfer.cc`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.cc)
+- [`third_party/blink/renderer/core/clipboard/data_transfer.h`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.h)
+- [`third_party/blink/renderer/core/input/mouse_event_manager.cc`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/input/mouse_event_manager.cc)
+- [`third_party/blink/renderer/core/page/drag_controller.cc`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/page/drag_controller.cc)
 
 ## Proposed Fix
 
@@ -272,7 +272,7 @@ timeline
      // to preserve web-set dropEffect values.
      bool drop_effect_set_by_web_ = false;
    ```
-   [View data_object.h](/third_party/blink/renderer/core/clipboard/data_object.h)
+   [View data_object.h](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_object.h)
 
 2. Modify `DataTransfer::setDropEffect()` to mark when web content sets the value in shared state:
    ```cpp
@@ -289,7 +289,7 @@ timeline
      data_object_->SetDropEffectSetByWeb(true);  // NEW: Track in shared DataObject
    }
    ```
-   [View setDropEffect()](/third_party/blink/renderer/core/clipboard/data_transfer.cc#L260)
+   [View setDropEffect()](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.cc;l=260)
 
 3. Modify `DataTransfer::SetDestinationOperation()` to respect web-set values from shared state:
    ```cpp
@@ -303,7 +303,7 @@ timeline
          static_cast<DragOperationsMask>(op));
    }
    ```
-   [View SetDestinationOperation()](/third_party/blink/renderer/core/clipboard/data_transfer.cc#L599)
+   [View SetDestinationOperation()](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.cc;l=599)
 
 4. Remove the instance-level flag from DataTransfer:
    ```cpp
@@ -616,14 +616,14 @@ graph LR
 ```
 
 ### Primary Files to Modify:
-- [`data_object.h`](/third_party/blink/renderer/core/clipboard/data_object.h) - Add `drop_effect_set_by_web_` member and accessor methods
-- [`data_object.cc`](/third_party/blink/renderer/core/clipboard/data_object.cc) - Initialize flag in constructor  
-- [`data_transfer.h`](/third_party/blink/renderer/core/clipboard/data_transfer.h) - Remove instance-level `drop_effect_set_by_web_` member
-- [`data_transfer.cc`](/third_party/blink/renderer/core/clipboard/data_transfer.cc) - Modify `setDropEffect()` and `SetDestinationOperation()` to use shared state
+- [`data_object.h`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_object.h) - Add `drop_effect_set_by_web_` member and accessor methods
+- [`data_object.cc`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_object.cc) - Initialize flag in constructor  
+- [`data_transfer.h`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.h) - Remove instance-level `drop_effect_set_by_web_` member
+- [`data_transfer.cc`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.cc) - Modify `setDropEffect()` and `SetDestinationOperation()` to use shared state
 
 ### Files for Testing:
-- [`third_party/blink/web_tests/fast/events/drag-and-drop/`](/third_party/blink/web_tests/fast/events/drag-and-drop/) - Web platform tests
-- [`third_party/blink/renderer/core/clipboard/data_transfer_test.cc`](/third_party/blink/renderer/core/clipboard/data_transfer_test.cc) - Unit tests (if exists)
+- [`third_party/blink/web_tests/fast/events/drag-and-drop/`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/web_tests/fast/events/drag-and-drop/) - Web platform tests
+- [`third_party/blink/renderer/core/clipboard/data_transfer_test.cc`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer_test.cc) - Unit tests
 
 ## Implementation Status
 
@@ -643,10 +643,10 @@ graph LR
 - **Backward compatibility**: ✅ No breaking changes to existing API surface
 
 ### 📝 Key Implementation Files:
-- **Modified**: [`data_object.h`](/workspace/cr1/src/third_party/blink/renderer/core/clipboard/data_object.h) - Added shared state tracking
-- **Modified**: [`data_transfer.cc`](/workspace/cr1/src/third_party/blink/renderer/core/clipboard/data_transfer.cc) - Updated to use shared state
-- **Modified**: [`data_transfer.h`](/workspace/cr1/src/third_party/blink/renderer/core/clipboard/data_transfer.h) - Removed instance-level flag
-- **Enhanced**: [`data_transfer_test.cc`](/workspace/cr1/src/third_party/blink/renderer/core/clipboard/data_transfer_test.cc) - Added multi-instance test
+- **Modified**: [`data_object.h`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_object.h) - Added shared state tracking
+- **Modified**: [`data_transfer.cc`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.cc) - Updated to use shared state
+- **Modified**: [`data_transfer.h`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer.h) - Removed instance-level flag
+- **Enhanced**: [`data_transfer_test.cc`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/blink/renderer/core/clipboard/data_transfer_test.cc) - Added multi-instance test
 
 ### 🎯 Success Criteria Met:
 - [x] **Spec Compliance**: dropEffect now reflects value from last dragenter/dragover event
