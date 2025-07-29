@@ -1,0 +1,1 @@
+This repo contains public docs regarding fixes being done to Chromium issues.
