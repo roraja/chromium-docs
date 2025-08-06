@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>dropEffect Demo: Drag-and-Drop Cursor Change</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    .container { display: flex; gap: 60px; align-items: flex-start;}
+    .draggable {
+      width: 120px; height: 40px;
+      margin: 12px 0;
+      background: #76b6ec;
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 7px;
+      cursor: grab;
+      font-weight: bold;
+      user-select: none;
+    }
+    .dropzone {
+      width: 200px; height: 180px;
+      border: 3px dashed #aaa;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: #f8faff;
+      transition: background 0.2s;
+    }
+    .dropzone.active { background: #e5f8dc; border-color: #71c071; }
+    label, select { font-size: 1.1em; }
+    .instructions { margin-top: 18px; color: #555; }
+    .status { margin-top: 1em; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <h2>HTML5 dropEffect Demo</h2>
+  <p>
+    <strong>Try this:</strong> Drag the colored block into the drop zone. Use the selector to change the <code>dropEffect</code> (what the drop will do) and watch the <b>cursor icon</b> change!
+  </p>
+
+  <div class="container">
+    <!-- Drag Source -->
+    <div>
+      <div class="draggable" draggable="true" id="dragitem">Drag me!</div>
+      <div class="instructions">
+        <strong>effectAllowed</strong>: <span id="effectAllowedDisplay">all</span>
+        <br>
+        (The drag source allows <b>all</b> drop types.)
+      </div>
+    </div>
+    <!-- Drop Target -->
+    <div>
+      <div>
+        <label for="dropEffectSelect">Choose dropEffect:</label>
+        <select id="dropEffectSelect">
+          <option value="copy" selected>copy</option>
+          <option value="move">move</option>
+          <option value="link">link</option>
+          <option value="none">none</option>
+        </select>
+      </div>
+      <div class="dropzone" id="dropzone">Drop here!</div>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <script>
+    const dragitem = document.getElementById('dragitem');
+    const dropzone = document.getElementById('dropzone');
+    const status = document.getElementById('status');
+    const dropEffectSelect = document.getElementById('dropEffectSelect');
+    const effectAllowedDisplay = document.getElementById('effectAllowedDisplay');
+
+    let dropEffectValue = dropEffectSelect.value;
+
+    // Set 'effectAllowed' on dragstart (the allowed operations)
+    dragitem.addEventListener('dragstart', function(e) {
+      e.dataTransfer.effectAllowed = 'all'; // Try 'copyMove' or 'move' to test limits
+      e.dataTransfer.setData('text/plain', 'Demo payload');
+      effectAllowedDisplay.textContent = e.dataTransfer.effectAllowed;
+      status.textContent = '';
+    });
+
+    // In drop target, set dropEffect depending on selector
+    dropzone.addEventListener('dragover', function(e) {
+      e.preventDefault(); // Must call to allow drop
+      status.textContent = ` current effect: "${e.dataTransfer.dropEffect}"`;
+      e.dataTransfer.dropEffect = dropEffectValue;
+      dropzone.classList.add('active');
+      // Optional: Show the type of allowed effect in status
+      status.textContent += ` Cursor shows: ${dropEffectValue} (if allowed)`;
+    });
+
+    dropzone.addEventListener('dragleave', function(e) {
+      dropzone.classList.remove('active');
+      status.textContent = '';
+    });
+
+    dropzone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      dropzone.classList.remove('active');
+      // Show result
+      const dropEffectFromDT = e.dataTransfer.dropEffect;
+      status.textContent += ` Dropped with effect: "${dropEffectFromDT}"`;
+    });
+
+    // Within dragend event, check the dropEffect, apepnd to status
+    dragitem.addEventListener('dragend', function(e) {
+      const dropEffectFromDT = e.dataTransfer.dropEffect;
+      status.textContent += ` Drag ended with dropEffect: "${dropEffectFromDT}"`;
+    });
+
+    // Change dropEffect live
+    dropEffectSelect.addEventListener('change', function() {
+      dropEffectValue = dropEffectSelect.value;
+      status.textContent = '';
+    });
+  </script>
+</body>
+</html>

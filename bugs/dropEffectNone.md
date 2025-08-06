@@ -23,16 +23,16 @@ Browser Process → Renderer Process → DOM Event
 8. `DispatchDragSrcEvent(event_type_names::kDragend, event)` (DOM event creation)
 
 ### Key Code Location
-**File:** `third_party/blink/renderer/core/input/mouse_event_manager.cc`  
-**Method:** `MouseEventManager::DragSourceEndedAt`  
-**Line:** 1071  
+**File:** `third_party/blink/renderer/core/input/mouse_event_manager.cc`
+**Method:** `MouseEventManager::DragSourceEndedAt`
+**Line:** 1071
 **Code:** `DispatchDragSrcEvent(event_type_names::kDragend, event)`
 
 ```cpp
 void MouseEventManager::DragSourceEndedAt(const WebMouseEvent& event,
                                           DragOperation operation) {
   // ... setup code ...
-  
+
   // Line 1071 - Final DragEnd event dispatch
   DispatchDragSrcEvent(event_type_names::kDragend, event);
 }
@@ -41,8 +41,8 @@ void MouseEventManager::DragSourceEndedAt(const WebMouseEvent& event,
 ## Drop Event Dispatch
 
 ### Browser-to-Renderer Entry Point
-**File:** `third_party/blink/renderer/core/frame/web_frame_widget_impl.cc`  
-**Method:** `WebFrameWidgetImpl::DragTargetDrop`  
+**File:** `third_party/blink/renderer/core/frame/web_frame_widget_impl.cc`
+**Method:** `WebFrameWidgetImpl::DragTargetDrop`
 **Lines:** 630-634
 
 ```cpp
@@ -53,11 +53,11 @@ void WebFrameWidgetImpl::DragTargetDrop(const WebDragData& web_drag_data,
                                          uint32_t key_modifiers,
                                          base::OnceClosure callback) {
   // ... validation and setup ...
-  
+
   DragData drag_data(current_drag_data_.Get(),
                      ViewportToRootFrame(point_in_viewport), screen_point,
                      operations_allowed_, web_drag_data.ForceDefaultAction());
-  
+
   // Line 633-634 - Initiate drop event sequence
   GetPage()->GetDragController().PerformDrag(&drag_data,
                                              *local_root_->GetFrame());
@@ -65,29 +65,29 @@ void WebFrameWidgetImpl::DragTargetDrop(const WebDragData& web_drag_data,
 ```
 
 ### Drag Controller Coordination
-**File:** `third_party/blink/renderer/core/page/drag_controller.cc`  
-**Method:** `DragController::PerformDrag`  
+**File:** `third_party/blink/renderer/core/page/drag_controller.cc`
+**Method:** `DragController::PerformDrag`
 **Lines:** 253-273
 
 ```cpp
 bool DragController::PerformDrag(DragData* drag_data, LocalFrame& local_root) {
   // ... drag operation setup ...
-  
+
   // Line 273 - Delegate to EventHandler for actual drop processing
   return event_handler.PerformDragAndDrop(CreateMouseEvent(drag_data), data_transfer);
 }
 ```
 
 ### Event Handler Drop Processing
-**File:** `third_party/blink/renderer/core/input/event_handler.cc`  
-**Method:** `EventHandler::PerformDragAndDrop`  
+**File:** `third_party/blink/renderer/core/input/event_handler.cc`
+**Method:** `EventHandler::PerformDragAndDrop`
 **Lines:** 1457-1465
 
 ```cpp
 bool EventHandler::PerformDragAndDrop(const PlatformMouseEvent& event,
                                       DataTransfer* data_transfer) {
   // ... target validation and setup ...
-  
+
   // Line 1465 - Final drop event dispatch
   return mouse_event_manager_->DispatchDragEvent(
       event_type_names::kDrop, drag_target_.Get(), nullptr, event, data_transfer);
@@ -95,7 +95,7 @@ bool EventHandler::PerformDragAndDrop(const PlatformMouseEvent& event,
 ```
 
 ### Final Drop Event Dispatch
-**File:** `third_party/blink/renderer/core/input/mouse_event_manager.cc`  
+**File:** `third_party/blink/renderer/core/input/mouse_event_manager.cc`
 **Method:** `MouseEventManager::DispatchDragEvent`
 
 ```cpp
@@ -157,28 +157,28 @@ flowchart TD
         B --> C[WebContentsImpl]
         C --> D[RenderWidgetHostImpl]
     end
-    
+
     subgraph "IPC Boundary"
         E[Mojo IPC Channel]
     end
-    
+
     subgraph "Renderer Process"
         F[WebFrameWidgetImpl] --> G[DragController]
         G --> H[EventHandler]
         H --> I[MouseEventManager]
         I --> J[DOM Event System]
     end
-    
+
     subgraph "Event Types"
         K[DragEnd Event]
         L[Drop Event]
     end
-    
+
     D --> E
     E --> F
     J --> K
     J --> L
-    
+
     style A fill:#ffeeee
     style D fill:#ffeeee
     style F fill:#eeffee
@@ -193,24 +193,24 @@ flowchart LR
     subgraph "Entry Point"
         A[WebFrameWidgetImpl::DragTargetDrop]
     end
-    
+
     subgraph "Validation & Setup"
         B[Create DragData]
         C[Validate Drop Zone]
         D[Check Permissions]
     end
-    
+
     subgraph "Event Coordination"
         E[DragController::PerformDrag]
         F[EventHandler::PerformDragAndDrop]
     end
-    
+
     subgraph "Event Dispatch"
         G[MouseEventManager::DispatchDragEvent]
         H[Create Drop Event]
         I[Dispatch to DOM]
     end
-    
+
     A --> B
     B --> C
     C --> D
@@ -219,7 +219,7 @@ flowchart LR
     F --> G
     G --> H
     H --> I
-    
+
     style A fill:#e1f5fe
     style E fill:#f3e5f5
     style G fill:#e8f5e8
@@ -252,13 +252,13 @@ void WebFrameWidgetImpl::DragSourceEndedAt(const gfx::PointF& point_in_viewport,
                                            base::OnceClosure callback) {
   // Creates fake mouse event and delegates to EventHandler
   WebMouseEvent fake_mouse_move(/* ... mouse event setup ... */);
-  
+
   local_root_->GetFrame()->GetEventHandler().DragSourceEndedAt(fake_mouse_move,
                                                                operation);
 }
 ```
 
-#### WebFrameWidgetImpl Drop Processing  
+#### WebFrameWidgetImpl Drop Processing
 ```cpp
 // File: third_party/blink/renderer/core/frame/web_frame_widget_impl.cc
 // Lines: 600-634
@@ -269,7 +269,7 @@ void WebFrameWidgetImpl::DragTargetDrop(/* parameters */) {
     DragTargetDragLeave(point_in_viewport, screen_point);
     return;
   }
-  
+
   // Create DragData and initiate drop sequence
   DragData drag_data(current_drag_data_.Get(), /* ... */);
   GetPage()->GetDragController().PerformDrag(&drag_data, *local_root_->GetFrame());
