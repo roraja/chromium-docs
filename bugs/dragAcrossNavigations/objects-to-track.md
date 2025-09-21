@@ -1,0 +1,4 @@
+third_party/blink/renderer/core/frame/web_frame_widget_impl.cc
+components/input/render_widget_host_input_event_router.cc
+content/browser/renderer_host/render_widget_host_impl.cc
+third_party/blink/renderer/core/frame/web_local_frame_impl.cc
